@@ -1,0 +1,29 @@
+name: Feature request
+description: Propose a focused retry-budget capability or integration
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Failure mode or problem
+      description: Explain the retry-pressure problem, not only the desired API.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This keeps shared retry budgets as Stormbreak's central concept.
+          required: true

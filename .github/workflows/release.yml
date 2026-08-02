@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: true
+      - name: Validate semantic-version tag
+        shell: bash
+        run: |
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid semantic-version tag: ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+          test "$(go list -m)" = "github.com/magnexis/stormbreak"
+      - name: Verify module
+        run: |
+          test -z "$(gofmt -l .)"
+          go test -count=1 -shuffle=on ./...
+          go test -race -count=1 ./...
+          go vet ./...
+          go test -run '^$' -fuzz '^FuzzBackoffBounds$' -fuzztime=5s .
+          go test -run '^$' -fuzz '^FuzzRetryAfterDelay$' -fuzztime=5s ./httpretry
+      - name: Create GitHub release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" --verify-tag --generate-notes --title "${GITHUB_REF_NAME}"
