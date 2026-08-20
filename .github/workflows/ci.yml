@@ -17,7 +17,7 @@ jobs:
       matrix:
         go: ["1.23.x", oldstable, stable]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go }}
@@ -33,7 +33,7 @@ jobs:
     name: Race detector
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: stable
@@ -48,7 +48,7 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: stable
@@ -59,7 +59,7 @@ jobs:
     name: Fuzz smoke tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: stable
