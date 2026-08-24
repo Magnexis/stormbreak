@@ -7,6 +7,11 @@ All notable changes to Stormbreak are documented here. The project follows
 
 ### Added
 
+- Added an original Stormbreak logo and linked the README identity directly to
+  the module's official `pkg.go.dev` page.
+- Expanded README with detailed semantics, configuration references, operational
+  sizing guidance, HTTP safety matrices, FAQ, navigation, and release badges.
+
 - Executable GoDoc examples and a database retry example.
 - Architecture documentation covering retry flow, invariants, and HTTP safety.
 - Deterministic internal timing seams for exact backoff and `Retry-After` tests.
