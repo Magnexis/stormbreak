@@ -35,6 +35,9 @@ type BudgetSnapshot struct {
 	RefillRate     int64
 	RefillInterval time.Duration
 	Exhausted      bool
+	// NextRefill is the next time at which a token can be restored. It is zero
+	// when refilling is disabled or the budget is already full.
+	NextRefill time.Time
 }
 
 // TokenBudget is a concurrency-safe, lazily refilled retry budget.
@@ -126,7 +129,33 @@ func (b *TokenBudget) Snapshot() BudgetSnapshot {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.refillLocked(b.now())
-	return BudgetSnapshot{Capacity: b.capacity, Remaining: b.remaining, RefillRate: b.refillRate, RefillInterval: b.refillInterval, Exhausted: b.remaining == 0}
+	return BudgetSnapshot{
+		Capacity:       b.capacity,
+		Remaining:      b.remaining,
+		RefillRate:     b.refillRate,
+		RefillInterval: b.refillInterval,
+		Exhausted:      b.remaining == 0,
+		NextRefill:     b.nextRefillLocked(),
+	}
+}
+
+// NextRefill returns when the next token can be restored. A zero value means
+// the budget does not refill or is currently full.
+func (b *TokenBudget) NextRefill() time.Time {
+	if b == nil {
+		return time.Time{}
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.refillLocked(b.now())
+	return b.nextRefillLocked()
+}
+
+func (b *TokenBudget) nextRefillLocked() time.Time {
+	if b.refillRate == 0 || b.remaining == b.capacity {
+		return time.Time{}
+	}
+	return b.lastRefill.Add(b.refillInterval)
 }
 
 func (b *TokenBudget) refillLocked(now time.Time) {

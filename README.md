@@ -86,7 +86,8 @@ databaseBudget, err := registry.Create("database", stormbreak.Config{
 
 Pass `githubBudget` to every GitHub caller and `databaseBudget` to every database
 caller. `Registry.Snapshot` and `TokenBudget.Snapshot` expose immutable state for
-monitoring.
+monitoring. Snapshots include `NextRefill`, making it possible to report when a
+depleted dependency budget can admit work again without maintaining a second timer.
 
 ## HTTP client
 

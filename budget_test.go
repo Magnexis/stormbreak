@@ -136,11 +136,31 @@ func TestBudgetConcurrentAccess(t *testing.T) {
 }
 
 func TestBudgetSnapshot(t *testing.T) {
-	budget, _ := NewBudget(Config{Capacity: 1, RefillRate: 1, RefillInterval: time.Minute})
+	now := time.Unix(100, 0)
+	budget, _ := newTokenBudget(Config{Capacity: 1, RefillRate: 1, RefillInterval: time.Minute}, func() time.Time { return now })
 	budget.Allow()
 	snapshot := budget.Snapshot()
-	if !snapshot.Exhausted || snapshot.Remaining != 0 || snapshot.Capacity != 1 {
+	if !snapshot.Exhausted || snapshot.Remaining != 0 || snapshot.Capacity != 1 || !snapshot.NextRefill.Equal(now.Add(time.Minute)) {
 		t.Fatalf("unexpected snapshot: %+v", snapshot)
+	}
+}
+
+func TestBudgetNextRefill(t *testing.T) {
+	now := time.Unix(100, 0)
+	budget, err := newTokenBudget(Config{Capacity: 2, RefillRate: 1, RefillInterval: time.Second}, func() time.Time { return now })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := budget.NextRefill(); !got.IsZero() {
+		t.Fatalf("NextRefill() while full = %v, want zero", got)
+	}
+	budget.Allow()
+	if got, want := budget.NextRefill(), now.Add(time.Second); !got.Equal(want) {
+		t.Fatalf("NextRefill() = %v, want %v", got, want)
+	}
+	now = now.Add(time.Second)
+	if got := budget.NextRefill(); !got.IsZero() {
+		t.Fatalf("NextRefill() after refill = %v, want zero", got)
 	}
 }
 

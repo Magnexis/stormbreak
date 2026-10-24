@@ -5,8 +5,11 @@ All notable changes to Stormbreak are documented here. The project follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-23
+
 ### Added
 
+- `BudgetSnapshot.NextRefill` and `TokenBudget.NextRefill` report when the next token can be restored. A zero time means refill is disabled or the budget is already full.
 - Executable GoDoc examples and a database retry example.
 - Architecture documentation covering retry flow, invariants, and HTTP safety.
 - Deterministic internal timing seams for exact backoff and `Retry-After` tests.
